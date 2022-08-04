@@ -6,6 +6,7 @@ authors = ["Lakshay Rohilla <LakshayRohilla@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+fastapi = "^0.75.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
