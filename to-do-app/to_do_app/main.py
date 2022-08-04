@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import get_redis_connection, Hashmodel
 from typing import Optional
-
+from starlette.requests import Request
 
 #1. Create a FastAPI app
 app = FastAPI()
@@ -61,3 +61,10 @@ def format(pk: str):
 async def create(task: Task):
     return task.save()
 
+# 8. Adding another endpoint to update the task.
+@app.put("/tasks/{pk}")
+async def update(pk:str, request: Request): # we could do this (task: Task) as well instead of request.
+    task = Task.get(pk)
+    body = await request.json() # getting data from the body.
+    task.complete = int(body["complete"]) # redis expect this as a integer thats why we convert it.
+    return task.save()
