@@ -2,6 +2,7 @@ from sqlite3 import DatabaseError
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from redis_om import get_redis_connection, Hashmodel
+from typing import Optional
 
 
 #1. Create a FastAPI app
@@ -36,7 +37,7 @@ redis_db = get_redis_connection(
 # 4. Data that we want to store in redis database.
 class Task(Hashmodel):
     name: str
-    complete: bool
+    complete: Optional[bool] = 0 # if we wont make it as optional, it will throw error on FE, that this field is required.
     # 4.1 To add the model to redis database we make class meta.
     class Meta:
         database = redis_db
@@ -45,5 +46,18 @@ class Task(Hashmodel):
 @app.get("/tasks")
 async def all():
     # 5. Return all the tasks in the database.
-    return Task.all_pks()
-    
+    return [format(pk) for pk in Task.all.pks()]
+
+# 7. This will help in storing the items in the TO DO list. 
+def format(pk: str):
+    task = Task.get(pk)
+    return {
+        "id": task.pk,
+        "name": task.name,
+        "complete": task.complete,
+    }
+# 6. Adding another endpoint to add the items.
+@app.post("/tasks")
+async def create(task: Task):
+    return task.save()
+
